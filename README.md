@@ -40,3 +40,6 @@ Now you can start the API server, which takes a database file as argument such a
 python app.py <db-file>
 ```
 It always starts the server on port 8000, if you want to change this do it in the function `run_server()` in `app.py`.
+
+
+**Remember to restart the Python server after making changes in app.py.**
