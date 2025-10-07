@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Products - Coffee Shop</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="icon.png">
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Products</h1>
+    <nav>
+      <a href="index.html">Home</a> | 
+      <a href="products.html">Products</a> | 
+      <a href="purchases.html">All Purchases</a> | 
+      <span data-guest><a href="login.html">Login</a> | <a href="register.html">Register</a></span>
+      <span data-authed style="display:none"><a href="mypurchases.html">My Purchases</a><button onclick="logout()">Logout</button></span>
+    </nav>
+  </header>
+  <main>
+    <ul class="product-list" id="list"></ul>
+    <p id="msg" role="status" style="margin-top:8px;"></p>
+  </main>
+  <footer><p>&copy; Introduction to Database Systems - Coffee Shop</p></footer>
+  <script>
+    async function loadProducts(){
+      try {
+        const products = await api('/products');
+        const ul = document.getElementById('list');
+        ul.innerHTML = '';
+        products.forEach(p => {
+          const li = document.createElement('li');
+          li.className = 'product';
+          li.innerHTML = `
+            <div>
+              <h3>${p.name}</h3>
+              <p>$${(p.price ?? 0).toFixed ? p.price.toFixed(2) : p.price} • ${p.description || ''}</p>
+            </div>
+            <div>
+              <button data-id="${p.name}" class="buy">Buy</button>
+            </div>`;
+          ul.appendChild(li);
+        });
+
+        document.querySelectorAll('button.buy').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (!getToken()) { alert('Please log in first.'); location.href='login.html'; return; }
+            try {
+              await api('/purchase', {method:'POST', body:{username: getToken(), productname: btn.getAttribute('data-id')}});
+              document.getElementById('msg').style.color = '#065';
+              document.getElementById('msg').textContent = 'Purchase complete!';
+            } catch (err) {
+              document.getElementById('msg').style.color = '#b00';
+              document.getElementById('msg').textContent = 'Purchase failed: ' + err.message;
+            }
+          });
+        });
+      } catch (err){
+        document.getElementById('msg').textContent = 'Failed to load products: ' + err.message;
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadProducts);
+  </script>
+</body>
+</html>

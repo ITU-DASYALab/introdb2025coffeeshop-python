@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Login - Coffee Shop</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="icon.png">
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Login</h1>
+    <nav>
+      <a href="index.html">Home</a> |
+      <a href="products.html">Products</a> |
+      <a href="purchases.html">All Purchases</a> |
+      <span data-guest><a href="login.html">Login</a> | <a href="register.html">Register</a></span>
+      <span data-authed style="display:none"><a href="mypurchases.html">My Purchases</a><button onclick="logout()">Logout</button></span>
+    </nav>
+  </header>
+  <main>
+    <form id="loginForm" class="form">
+      <label>Username: <input name="username" required></label><br>
+      <label>Password: <input type="password" name="password" required></label><br>
+      <button type="submit">Login</button>
+    </form>
+    <p id="msg" role="status" style="color:#b00;margin-top:8px;"></p>
+    <p>Don't have an account? <a href="register.html">Register</a></p>
+  </main>
+  <footer><p>&copy; Introduction to Database Systems - Coffee Shop</p></footer>
+  <script>
+    const form = document.getElementById('loginForm');
+    const msg  = document.getElementById('msg');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      const data = Object.fromEntries(new FormData(form).entries());
+      try {
+        // Expect FastAPI to return: { access_token: "...", token_type: "bearer" }
+        const res = await api('/login', {method:'POST', body: data});
+        if (!res.access_token) throw new Error('No token returned');
+        saveToken(res.access_token);
+        setAuthUI();
+        location.href = 'products.html';
+      } catch (err) {
+        msg.textContent = 'Login failed: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
