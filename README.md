@@ -1,4 +1,4 @@
-# How to run the Python version
+# How to start the project
 
 Install Python if you have not done so already.
 
@@ -14,21 +14,29 @@ cd web
 python -m http.server 8080
 ```
 
-This starts an HTTP server on http://localhost:8000. 
+This starts an HTTP server on http://localhost:8080. 
 In other words the contents of the folder are accessible from that URL, and since there is an index.html inside the folder it dictates the web interface.
 
 
 ## Terminal 2: Python API Server
 
-From the current directory install the required python packages by running:
+From the project root directory install the required python packages by running:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Now you can start the API server, which takes a database file as argument.
+### Create the database file
+
+Create a `coffee.db` file and execute the statements in `init.sql` using DuckDB:
+
+```bash
+duckdb coffee.db < init.sql
+```
+
+### Start the server
+Now you can start the API server, which takes a database file as argument such as `coffee.db`.
 ```bash
 python app.py <db-file>
 ```
 It always starts the server on port 8000, if you want to change this do it in the function `run_server()` in `app.py`.
-
