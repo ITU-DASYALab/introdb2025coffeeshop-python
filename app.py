@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -8,15 +9,18 @@ import click
 import uvicorn
 from datetime import datetime
 
+@dataclass
 class Login(BaseModel):
     username: str
     password: str
 
+@dataclass
 class Registration(BaseModel):
     username: str
     password: str
     email: str
 
+@dataclass
 class PurchaseRequest(BaseModel):
     username: str
     productname: str
@@ -59,7 +63,7 @@ def login(login: Login):
     try:
         db = duckdb.connect(CONNECTION)
         db.execute(
-            "SELECT * FROM User WHERE username = ? AND password = ?",
+            "select * from user where username = ? and password = ?",
             [login.username, login.password]
         )
         if db.fetchone() is not None:
@@ -82,7 +86,7 @@ def get_products():
     try:
         db = duckdb.connect(CONNECTION)
         rows = db.execute(
-            "SELECT productname as name, price, description FROM Product"
+            "select productname as name, price, description from product"
         ).fetchall()
         columns = [desc[0] for desc in db.description]
         return convert_rows_to_dicts(rows, columns)
@@ -125,7 +129,7 @@ def get_all_purchases():
     try:
         db = duckdb.connect(CONNECTION)
         rows = db.execute(
-            "SELECT * FROM Purchase", 
+            "select * from purchase", 
         ).fetchall()
         columns = [desc[0] for desc in db.description]
         return convert_rows_to_dicts(rows, columns)
