@@ -60,19 +60,23 @@ def login(login: Login):
     dict:
         A dictionary with the access token and token type if the user exists, otherwise an empty dictionary
     """
+    conn = None
     try:
-        db = duckdb.connect(CONNECTION)
-        db.execute(
+        conn = duckdb.connect(CONNECTION)
+        conn.execute(
             "select * from user where username = ? and password = ?",
             [login.username, login.password]
         )
-        if db.fetchone() is not None:
+        if conn.fetchone() is not None:
             return {'access_token': login.username, 'token_type': 'bearer'}
         else:
             return {}
     except duckdb.Error as e:
         print(e)
         return HTTPException(400, detail=e)
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 @app.get("/products")
@@ -84,12 +88,12 @@ def get_products():
         A list of dictionaries with the product information
     """
     try:
-        db = duckdb.connect(CONNECTION)
-        rows = db.execute(
-            "select productname as name, price, description from product"
-        ).fetchall()
-        columns = [desc[0] for desc in db.description]
-        return convert_rows_to_dicts(rows, columns)
+        with duckdb.connect(CONNECTION) as conn:
+            rows = conn.execute(
+                "select productname as name, price, description from product"
+            ).fetchall()
+            columns = [desc[0] for desc in conn.description]
+            return convert_rows_to_dicts(rows, columns)
     except duckdb.Error as e:
         print(e)
         return HTTPException(400, detail=e)
@@ -127,12 +131,12 @@ def get_all_purchases():
         A list of dictionaries with the purchase information
     """
     try:
-        db = duckdb.connect(CONNECTION)
-        rows = db.execute(
-            "select * from purchase", 
-        ).fetchall()
-        columns = [desc[0] for desc in db.description]
-        return convert_rows_to_dicts(rows, columns)
+        with duckdb.connect(CONNECTION) as conn:
+            rows = conn.execute(
+                "select * from purchase", 
+            ).fetchall()
+            columns = [desc[0] for desc in conn.description]
+            return convert_rows_to_dicts(rows, columns)
     except duckdb.Error as e:
         print(e)
         return HTTPException(400, detail=e)
