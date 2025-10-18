@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -9,18 +8,15 @@ import click
 import uvicorn
 from datetime import datetime
 
-@dataclass
 class Login(BaseModel):
     username: str
     password: str
 
-@dataclass
 class Registration(BaseModel):
     username: str
     password: str
     email: str
 
-@dataclass
 class PurchaseRequest(BaseModel):
     username: str
     productname: str
