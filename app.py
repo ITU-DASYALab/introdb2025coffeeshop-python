@@ -46,7 +46,7 @@ def convert_rows_to_dicts(rows, columns):
     # return [dict(zip(columns,row)) for row in rows]
 
 @app.post("/login")
-def login(login: Login):
+def login(info: Login):
     """
     Returns a token if the user exists in the database
     ### Parameters
@@ -58,13 +58,13 @@ def login(login: Login):
     """
     conn = None
     try:
-        conn = duckdb.connect(CONNECTION)
+        conn = duckdb.connect(CONNECTION, read_only=True)
         conn.execute(
             "select * from user where username = ? and password = ?",
-            [login.username, login.password]
+            [info.username, info.password]
         )
         if conn.fetchone() is not None:
-            return {'access_token': login.username, 'token_type': 'bearer'}
+            return {'access_token': info.username, 'token_type': 'bearer'}
         else:
             return {}
     except duckdb.Error as e:
@@ -84,7 +84,7 @@ def get_products():
         A list of dictionaries with the product information
     """
     try:
-        with duckdb.connect(CONNECTION) as conn:
+        with duckdb.connect(CONNECTION, read_only=True) as conn:
             rows = conn.execute(
                 "select productname as name, price, description from product"
             ).fetchall()
@@ -127,7 +127,7 @@ def get_all_purchases():
         A list of dictionaries with the purchase information
     """
     try:
-        with duckdb.connect(CONNECTION) as conn:
+        with duckdb.connect(CONNECTION, read_only=True) as conn:
             rows = conn.execute(
                 "select * from purchase", 
             ).fetchall()
@@ -147,10 +147,12 @@ def get_user_purchases(session: str):
         The username of the user
     ### Returns
     list:
-        A list of dictionaries with the purchase information
+        A list of dictionaries with the purchase information 
+        (You can use convert_rows_to_dicts to do this. See get_all_purchases for an example)
     """
     try:
-        # TODO: query the database for purchases by this user ordered by time descending, and populate the purchases list
+        # TODO: query the database for purchases by this user ordered by time descending,
+        # and populate the purchases list
         return []
     except duckdb.Error as e:
         print(e)
